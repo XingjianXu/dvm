@@ -5,7 +5,7 @@ require 'dvm/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'dvm'
-  spec.version       = Dvm::VERSION
+  spec.version       = DVM::VERSION
   spec.authors       = ['Xingjian  Xu']
   spec.email         = ['dotswing@gmail.com']
   spec.summary       = %q{Deploy version manager}
@@ -20,4 +20,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler', '~> 1.6'
   spec.add_development_dependency 'rake', '~> 10.0'
+
+  spec.add_runtime_dependency 'colorize', '~> 0.7'
 end

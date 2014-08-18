@@ -1,5 +1,5 @@
-require "dvm/version"
+require 'dvm/version'
+require 'dvm/cli'
 
-module Dvm
-  # Your code goes here...
+module DVM
 end

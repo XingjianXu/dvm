@@ -1,3 +1,3 @@
-module Dvm
-  VERSION = "0.0.1"
+module DVM
+  VERSION = '0.0.1'
 end
