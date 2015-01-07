@@ -1,6 +1,6 @@
 # Dvm
 
-TODO: Write a gem description
+Distribution version manager
 
 ## Installation
 

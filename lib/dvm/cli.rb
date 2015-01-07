@@ -1,11 +1,12 @@
 require 'fileutils'
 
-module DVM
+module Dvm
   class CLI
 
     def initialize(root, repo)
       @root = root
       @repo = repo
+      @dsl = Dsl.new
     end
 
     def path(p)
@@ -45,8 +46,8 @@ module DVM
     end
 
     def shared_files
-      Dir.glob(current_path('config', '*.example')).collect do |c|
-        File.join 'config', File.basename(c, File.extname(c))
+      Dir.glob(current_path('config', '**', '*.example')).collect do |c|
+        File.join 'config', c.split('config')[1][1..-1].split('.')[0..-2].join('.')
       end
     end
 
@@ -80,8 +81,9 @@ module DVM
 
 
     def copy_config
-      Dir.glob(current_path('config', '*.example')).each do |c|
-        FileUtils.cp c, share_path('config', File.basename(c, '.example'))
+      Dir.glob(current_path('config', '**', '*.example')).each do |c|
+        puts c
+        FileUtils.cp c, share_path('config', c.split('config')[1][1..-1].split('.')[0..-2].join('.'))
       end
     end
 
@@ -103,6 +105,26 @@ module DVM
     end
 
 
+    def vam_install
+      `cd #{current};vam install` if File.exist? File.join(current, 'Vamfile')
+    end
+
+
+    def assets_precompile
+      `cd #{current};RAILS_ENV=production bundle exec rake assets:precompile`
+    end
+
+
+    def db_setup
+      `cd #{current};RAILS_ENV=production bundle exec rake db:setup`
+    end
+
+
+    def bundle_install
+      `cd #{current};RAILS_ENV=production bundle install`
+    end
+
+
     def init_install
       clone
       link_current checkout
@@ -110,10 +132,27 @@ module DVM
       shared_files.each { |e| FileUtils.makedirs File.dirname(share_path(e)) }
       copy_config
       link_shared
+      bundle_install
+      vam_install
+      assets_precompile
+      db_setup
+
+      puts '======= Deploy success ======'
+    end
+
+
+    def pull
+      `cd #{scm};git pull`
+    end
+
+
+    def update
+      pull
+      link_current checkout
+      link_shared
       `cd #{current};RAILS_ENV=production bundle install`
       `cd #{current};vam install`
-      `cd #{current};RAILS_ENV=production rake assets:precompile`
-      `cd #{current};RAILS_ENV=production rake db:setup`
+      `cd #{current};RAILS_ENV=production bundle exec rake assets:precompile`
 
       puts '======= Deploy success ======'
     end
@@ -125,7 +164,8 @@ module DVM
         if action == 'remote'
           puts '1'
 
-        elsif action == 'deploy'
+        elsif action == 'update'
+          CLI.new(Dir.getwd, '').update
         else
           root = Dir.getwd
           repo = action
