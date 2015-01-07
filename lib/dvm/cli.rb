@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'colorize'
 
 module Dvm
   class CLI
@@ -6,7 +7,6 @@ module Dvm
     def initialize(root, repo)
       @root = root
       @repo = repo
-      @dsl = Dsl.new
     end
 
     def path(p)
@@ -65,7 +65,7 @@ module Dvm
 
 
     def clone
-      `git clone --bare #{@repo} #{scm}`
+      run_cmd "git clone --bare #{@repo} #{scm}"
     end
 
 
@@ -73,8 +73,8 @@ module Dvm
       version = `cd #{scm};git rev-parse --short HEAD`.strip
       vd = release version
       FileUtils.makedirs vd
-      `cd #{scm};git archive master | tar -x -f - -C #{vd}`
-      `echo #{version} > #{vd}/REVISION`
+      run_cmd "cd #{scm};git archive master | tar -x -f - -C #{vd}"
+      run_cmd "echo #{version} > #{vd}/REVISION"
       new_version version
       version
     end
@@ -89,72 +89,95 @@ module Dvm
 
 
     def link_current(v)
-      `unlink #{current}` if File.directory? current
-      `ln -s #{release(v)} #{current}`
+      run_cmd "unlink #{current}" if File.directory? current
+      run_cmd "ln -s #{release(v)} #{current}"
     end
 
 
     def link_shared
       shared_dirs.each do |e|
-        `rm -rf #{current_path(e)};ln -s #{share_path(e)} #{File.dirname(current_path(e))}`
+        run_cmd "rm -rf #{current_path(e)};ln -s #{share_path(e)} #{File.dirname(current_path(e))}"
       end
 
       shared_files.each do |e|
-        `rm -f #{current_path(e)};ln -s #{share_path(e)} #{current_path(e)}`
+        run_cmd "rm -f #{current_path(e)};ln -s #{share_path(e)} #{current_path(e)}"
       end
     end
 
 
     def vam_install
-      `cd #{current};vam install` if File.exist? File.join(current, 'Vamfile')
+      log_action 'Vam install'
+      run_cmd "cd #{current};vam install" if File.exist? File.join(current, 'Vamfile')
     end
 
 
     def assets_precompile
-      `cd #{current};RAILS_ENV=production bundle exec rake assets:precompile`
+      log_action 'Rails assets precompile'
+      run_cmd "cd #{current};RAILS_ENV=production bundle exec rake assets:precompile"
     end
 
 
     def db_setup
-      `cd #{current};RAILS_ENV=production bundle exec rake db:setup`
+      log_action 'Rails db setup'
+      run_cmd "cd #{current};RAILS_ENV=production bundle exec rake db:setup"
     end
 
 
     def bundle_install
-      `cd #{current};RAILS_ENV=production bundle install`
+      log_action 'Rails bundle install'
+      run_cmd "cd #{current};RAILS_ENV=production bundle install"
     end
 
 
     def init_install
+      log_action 'Git clone'
       clone
       link_current checkout
+
+      log_action 'Copy & Link config files'
       shared_dirs.each { |e| FileUtils.makedirs share_path(e) }
       shared_files.each { |e| FileUtils.makedirs File.dirname(share_path(e)) }
       copy_config
       link_shared
+
       bundle_install
       vam_install
       assets_precompile
       db_setup
 
-      puts '======= Deploy success ======'
+      puts '======= Deploy success ======'.colorize :green
     end
 
 
     def pull
-      `cd #{scm};git pull`
+      run_cmd "cd #{scm};git pull"
     end
 
 
     def update
+      log_action 'Git pull'
       pull
       link_current checkout
-      link_shared
-      `cd #{current};RAILS_ENV=production bundle install`
-      `cd #{current};vam install`
-      `cd #{current};RAILS_ENV=production bundle exec rake assets:precompile`
 
-      puts '======= Deploy success ======'
+      log_action 'Link config files'
+      link_shared
+
+      bundle_install
+      vam_install
+      assets_precompile
+
+      puts '======= Deploy success ======'.colorize :green
+    end
+
+
+    def log_action(action)
+      puts "\n======= #{action} =======".colorize :blue
+    end
+
+
+    def run_cmd(cmd)
+      puts "#RUN[ #{cmd} ]"
+      system cmd
     end
 
 
