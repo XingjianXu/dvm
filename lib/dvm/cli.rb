@@ -143,14 +143,13 @@ module Dvm
       bundle_install
       vam_install
       assets_precompile
-      db_setup
 
       puts '======= Deploy success ======'.colorize :green
     end
 
 
     def pull
-      run_cmd "cd #{scm};git pull"
+      run_cmd "cd #{scm};git fetch origin master:master"
     end
 
 
