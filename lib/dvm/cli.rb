@@ -180,6 +180,36 @@ module Dvm
     end
 
 
+    def start
+      if Dir.exist? current
+        `cd #{current};pumactl start`
+      elsif File.exist? 'Gemfile'
+        `pumactl start`
+      else
+        puts 'Start server failed.'.colorize :red
+      end
+      puts 'Start server success.'.colorize :green
+    end
+
+
+    def stop
+      if Dir.exist? current
+        `cd #{current};kill -9 cat \`tmp/server.pid\``
+      elsif File.exist? 'Gemfile'
+        `kill -9 cat \`tmp/server.pid\``
+      else
+        puts 'Stop server failed.'.colorize :red
+      end
+      puts 'Stop server success.'.colorize :green
+    end
+
+
+    def restart
+      stop
+      start
+    end
+
+
     def self.run(argv)
       if argv.length >0
         action = argv[0]
@@ -188,6 +218,12 @@ module Dvm
 
         elsif action == 'update'
           CLI.new(Dir.getwd, '').update
+        elsif action == 'start'
+          CLI.new(Dir.getwd, '').start
+        elsif action == 'stop'
+          CLI.new(Dir.getwd, '').stop
+        elsif action == 'restart'
+          CLI.new(Dir.getwd, '').restart
         else
           root = Dir.getwd
           repo = action
