@@ -182,7 +182,7 @@ module Dvm
 
     def start
       if Dir.exist? current
-        `cd #{current};pumactl start`
+        `cd #{current};bundle exec pumactl start`
       elsif File.exist? 'Gemfile'
         `pumactl start`
       else
