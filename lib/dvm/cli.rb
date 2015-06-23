@@ -125,7 +125,7 @@ module Dvm
 
     def bundle_install
       log_action 'Rails bundle install'
-      run_cmd "cd #{current};RAILS_ENV=production bundle install"
+      run_cmd "cd #{current};RAILS_ENV=production bundle install --deployment"
     end
 
 
