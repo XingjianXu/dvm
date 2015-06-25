@@ -194,9 +194,9 @@ module Dvm
 
     def stop
       if Dir.exist? current
-        `cd #{current};kill -9 cat \`tmp/server.pid\``
+        `cd #{current};kill -9 \`cat tmp/server.pid\``
       elsif File.exist? 'Gemfile'
-        `kill -9 cat \`tmp/server.pid\``
+        `kill -9 \`cat tmp/server.pid\``
       else
         puts 'Stop server failed.'.colorize :red
       end
