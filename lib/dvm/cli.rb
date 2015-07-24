@@ -42,7 +42,7 @@ module Dvm
     end
 
     def shared_dirs
-      %w(public/upload log)
+      %w(public/upload log vendor)
     end
 
     def shared_files
