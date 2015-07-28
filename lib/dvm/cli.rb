@@ -224,6 +224,11 @@ module Dvm
           CLI.new(Dir.getwd, '').stop
         elsif action == 'restart'
           CLI.new(Dir.getwd, '').restart
+	elsif action == 'deploy'
+	  cli = CLI.new Dir.getcwd, ''
+ 	  cli.stop
+ 	  cli.update
+	  cli.start
         else
           root = Dir.getwd
           repo = action
