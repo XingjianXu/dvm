@@ -83,7 +83,7 @@ module Dvm
     def copy_config
       Dir.glob(current_path('config', '**', '*.example')).each do |c|
         puts c
-        FileUtils.cp c, share_path('config', c.split('config')[1][1..-1].split('.')[0..-2].join('.'))
+        FileUtils.cp c, share_path('config', c.split('config')[1..-1].join('config')[1..-1].split('.')[0..-2].join('.'))
       end
     end
 
