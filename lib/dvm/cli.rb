@@ -47,7 +47,7 @@ module Dvm
 
     def shared_files
       Dir.glob(current_path('config', '**', '*.example')).collect do |c|
-        File.join 'config', c.split('config')[1][1..-1].split('.')[0..-2].join('.')
+        File.join 'config', c.split('config')[1..-1].join('config')[1..-1].split('.')[0..-2].join('.')
       end
     end
 
